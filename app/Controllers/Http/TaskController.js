@@ -1,5 +1,7 @@
 'use strict'
 
+const Task = use('App/Models/Task')
+
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
@@ -18,6 +20,12 @@ class TaskController {
    * @param {View} ctx.view
    */
   async index ({ request, response, view }) {
+    const tasks = await Task.query().where('project_id', params.projects_id)
+    .with('user')
+    .fetch()
+
+    return tasks
+
   }
 
   /**
@@ -29,7 +37,17 @@ class TaskController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async create ({ request, response, view }) {
+  async create ({ params, request, response, view }) {
+    const data = request.only([
+      'user_id',
+      'title',
+      'description',
+      'due_date',
+      'file_id'
+    ])
+
+    const task = await Task.create( {...data, project_id: params.projects_id})
+    return task
   }
 
   /**
